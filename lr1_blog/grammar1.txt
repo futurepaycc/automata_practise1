@@ -1,0 +1,130 @@
+lexemes IDENTIFIER, STRING, NUMBER, PLUGIN
+
+program: 
+program: program declaration
+
+block: "{" declarations "}"
+
+declarations:
+declarations: declarations declaration
+
+declaration: varDecl | constDecl | statement
+
+varDecl: "var" IDENTIFIER                ";"
+       | "var" IDENTIFIER "=" expression ";"
+
+constDecl: "const" IDENTIFIER "=" expression ";"
+
+statement: "print" expression ";"
+         | "if" "(" expression ")" statement "else" statement ";"
+         | "if" "(" expression ")" statement ";"
+         | "do" statement "while" "(" expression ")" ";"
+         | "while" "(" expression ")" statement ";"
+#         | "for" "(" varExpr expression ")" statement
+#         | "for" "(" varExpr expression ";" expression ")" statement
+         | "break" ";"
+         | "continue" ";"
+         | "return" ";"
+         | "return" expression ";"
+         | "assert" "(" expression ")" ";"
+         | "assert" "(" expression "," expression ")" ";"
+         | "import" STRING ";"
+         | "import" STRING "as" IDENTIFIER ";"
+         | block
+         | expression ";"
+         | ";"
+
+#varExpr: varDecl | expression ";" | ";"
+
+expression: unary
+
+assignment: ternary
+          | IDENTIFIER iop expression
+
+#assignment: IDENTIFIER primaries iop expression
+
+iop: "=" | "+=" | "-=" | "*=" | "/=" | "%="
+
+primaries: 
+primaries: primaries "[" primary "]"
+
+ternary: or
+       | or "?" expression ":" expression
+
+or: and
+  | and "||" or
+
+and: equality
+   | equality "&&" and
+
+equality: comparison
+        | equality "==" comparison
+        | equality "!=" comparison
+
+comparison: addition
+          | comparison ">" addition
+          | comparison ">=" addition
+          | comparison "<" addition
+          | comparison "<=" addition
+
+addition: multiplication
+        | addition "-" multiplication
+        | addition "+" multiplication
+
+multiplication: unary
+              | multiplication "*" unary
+              | multiplication "/" unary
+              | multiplication "%" unary
+
+unary: prefix
+     | "!" unary
+     | "-" unary
+
+prefix: "++" IDENTIFIER
+      | "--" IDENTIFIER
+      | postfix
+
+postfix: IDENTIFIER "++"
+       | IDENTIFIER "--"
+       | call
+
+call: primary
+    | call "(" ")"
+    | call "(" arguments ")"
+    | call "[" slice "]"
+    | call "." IDENTIFIER
+#    | call "|>" expression
+#    | call "<|" expression
+
+arguments: expression
+         | arguments "," expression
+
+slice: primary
+#     | ":"
+#     | ":" primary
+#     | ":" ":" primary
+#     | primary ":"
+#     | primary ":"
+#     | primary ":" ":" primary
+#     | primary ":" primary
+#     | primary ":" primary ":" primary
+
+primary: "true"
+       | "false"
+       | "null"
+       | NUMBER
+       | STRING
+       | IDENTIFIER
+       | PLUGIN
+       | function
+       | "(" expression ")"
+
+function: "function" "(" parameters ")" block
+        | "function" "(" ")" block
+#        | "(" parameters ")" "=>" expression
+#        | "(" parameters ")" "=>" block
+#        | IDENTIFIER "=>" expression
+#        | IDENTIFIER "=>" block
+
+parameters: IDENTIFIER
+          | parameters "," IDENTIFIER
