@@ -1,5 +1,6 @@
 """ 
 来源: https://github.com/ofey404/blogCode 
+原理: https://deniskyashif.com/2019/02/17/implementing-a-regular-expression-engine/
 优点: NFA代码易读，有状态输出
 缺点: 词法、文法非典型算法，基于栈和组合虚拟机
 """

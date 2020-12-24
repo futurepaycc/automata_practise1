@@ -1,8 +1,11 @@
 """ 
 正则表达式制作-enfa表
+原理: https://deniskyashif.com/2019/02/17/implementing-a-regular-expression-engine/
 FIXME:
-1. 目前只是单状态制表
+1. 目前只是单状态制表，如 ab| 不能正确打印
 2. 字母表为{a,b}
+3. ab. 连接表达式为何多了一个ε转换呢? Thompson’s 算法串联的原因(参考原理)?
+    * https://xysun.github.io/posts/regex-parsing-thompsons-algorithm.html
 """
 from box import Box
 class NFA_State:
@@ -12,8 +15,8 @@ class NFA_State:
         self.transition = {}
         self.epsilon_transition = []
 
-        # self.id = NFA_State.global_id
-        self.id = 'q'+str(NFA_State.global_id)
+        self.id = NFA_State.global_id
+        # self.id = 'q'+str(NFA_State.global_id)
         NFA_State.global_id += 1
 
 
@@ -167,6 +170,59 @@ def closure(nfa: NFA) -> NFA:
 # ---------------------------------------------------------------------
 #  测试，说明: 使用postfix表达式
 # ---------------------------------------------------------------------
+operators = [".", "|", "*"]
+
+parenthesis = ["(", ")"]
+not_end_of_trunk = [".", "(", "|"]
+not_start_of_trunk = [")", ".", "*", "|"]
+precedence = {
+    "|": 0,
+    ".": 1,
+    "*": 2,
+}
+def insert_explicit_concate_operator(exp: str) -> str:
+    output = ""
+    for i, token in enumerate(exp):
+        output += token
+        if token in not_end_of_trunk:
+            continue
+        
+        # If nothing to peek, break.
+        if i == len(exp) - 1:
+            continue
+        peek_next = exp[i+1]
+
+        if peek_next not in not_start_of_trunk:
+            output += "."
+        
+    return output
+
+def to_postfix(explicited_concate_exp: str) -> str:
+    def stack_top_is_poppable(stack, token):
+        return (len(stack) > 0) and (stack[-1] != "(") and (precedence[stack[-1]] >= precedence[token])
+
+    output = ""
+    operator_stack = []
+    
+    for token in explicited_concate_exp:
+        if (token not in operators) and (token not in parenthesis):
+            output += token
+        if token in operators:
+            while stack_top_is_poppable(operator_stack, token):
+                output += operator_stack.pop()
+            operator_stack.append(token)
+        if token == "(":
+            operator_stack.append(token)
+        if token == ")":
+            while (operator_stack[-1] != "("):
+                output += operator_stack.pop()
+            operator_stack.pop()
+        
+    while operator_stack:
+        output += operator_stack.pop()
+        
+    return output
+
 import unittest
 class Test_NFA(unittest.TestCase):
     def test_pass(self):
@@ -179,8 +235,16 @@ class Test_NFA(unittest.TestCase):
     #     print(  from_symbol('a')    )
 
     # TODO: 简化输出，制成表格
-    def test_concat(self):
-        nfa = to_NFA("ab.*") #NOTE: 这里要是postfix表达式
+    def test_test1(self):
+        nfa = to_NFA("ab.") #NOTE: 这里要是postfix表达式
+        nfa = to_NFA("ab|") #NOTE: 这里要是postfix表达式
+        nfa = to_NFA("ab*.") #NOTE: 这里要是postfix表达式 ab*
+        print("<>\t\ta\t\tb\t\tε")
+        print(nfa)
+
+    def test_test2(self):
+        post_expr = to_postfix(insert_explicit_concate_operator("ab*"))
+        nfa = to_NFA(post_expr) #NOTE: 这里要是postfix表达式
         print("<>\t\ta\t\tb\t\tε")
         print(nfa)
 
