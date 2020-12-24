@@ -1,5 +1,6 @@
 """ 
 来源: https://raw.githubusercontent.com/theodoregold/pushdown-automata/master/main.py 
+视频: https://www.bilibili.com/video/BV1oE4116794?p=26
 操作: python pda1.py; input1: pda1.txt input2: aa
 """
 #!/usr/bin/python

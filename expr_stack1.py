@@ -62,7 +62,7 @@ def evalute(tokens):
         op = ops.pop()
         values.append(applyOp(val1,val2,op))
 
-    return values[-1]
+    return values[-1] #返回栈顶
 
 if __name__ == "__main__":
     print(evalute("10 + 2 * 6"))

@@ -1,0 +1,9 @@
+{
+    "python.pythonPath": "/home/liunix/.pyenv/versions/3.7.7/bin/python",
+    "files.associations": {
+        "*.mvl": "html",
+        "*.lex": "lex",
+        "fstream": "cpp",
+        "*.inc": "cpp"
+    }
+}
