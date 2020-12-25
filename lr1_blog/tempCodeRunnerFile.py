@@ -1,0 +1,1 @@
+and len(token_stack) > 1
