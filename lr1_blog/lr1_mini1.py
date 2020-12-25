@@ -21,31 +21,29 @@ class State:
         self.top = 0
 
 
-def advance(state, next_symbol):
-    while GLOBAL_STACK[state.top][next_symbol](state):
+def parser_stmt(state, next_symbol):
+    while GLOBAL_STACK[state.top][next_symbol](state): #这个while可以会帮助shifter启动下一个状态运转
         pass
 
+def reduce_builder(count, symbol):
+    def _reduce(state):
+        for _ in range(count):
+            state.top = state.stack.pop() #首先清空State栈
+        print('reduce {}'.format(symbol))
+        GLOBAL_STACK[state.top][symbol](state) #reducer会自动启动下一状态的运转
+        return True #也不终止while循环
+    return _reduce
 
-def shift_closure(to_number):
+def shift_builder(to_number):
     def _shift(state):
         print('shift {}'.format(to_number))
         state.stack.append(state.top)
         state.top = to_number
-        return False
-    return _shift
+        return False #这里返回False终止while循环?
+    return _shift    
 
 
-def reduce_closure(count, symbol):
-    def _reduce(state):
-        for _ in range(count):
-            state.top = state.stack.pop()
-        print('reduce {}'.format(symbol))
-        GLOBAL_STACK[state.top][symbol](state)
-        return True
-    return _reduce
-
-
-def accept_closure():
+def accept_builder():
     def _accept(state):
         state.top = state.stack.pop()
         print('accepted')
@@ -81,57 +79,55 @@ statement ->
 # 下面应该就是模拟分析表
 GLOBAL_STACK = [
     #0
-    {'$':           reduce_closure(0, 'program'), #归约到program
-     'varDecl':     reduce_closure(0, 'program'), #归约到program 
-     'constDecl':   reduce_closure(0, 'program'), #归约到program
-     'statement':   reduce_closure(0, 'program'), #归约到program
-     'program':     shift_closure(1)    #非终结符1
+    {'$':           reduce_builder(0, 'program'), #归约到program
+     'varDecl':     reduce_builder(0, 'program'), #归约到program 
+     'constDecl':   reduce_builder(0, 'program'), #归约到program
+     'statement':   reduce_builder(0, 'program'), #归约到program
+     'program':     shift_builder(1)    #非终结符1
      },
 
     #1
-    {'$':           accept_closure(),
-     'declaration': shift_closure(2),   #非终结符2
-     'varDecl':     shift_closure(3),   #移进到终结元素: GLOBAL_STACK[3]
-     'constDecl':   shift_closure(4),   #移进到终结元素: GLOBAL_STACK[4]
-     'statement':   shift_closure(5)    #移进到终结元素: GLOBAL_STACK[5]
+    {'$':           accept_builder(),
+     'declaration': shift_builder(2),   #非终结符2
+     'varDecl':     shift_builder(3),   #移进到终结元素: GLOBAL_STACK[3]
+     'constDecl':   shift_builder(4),   #移进到终结元素: GLOBAL_STACK[4]
+     'statement':   shift_builder(5)    #移进到终结元素: GLOBAL_STACK[5]
      },
 
     #2
-    {'$':           reduce_closure(2, 'program'),#归约到非终状态: program? 
-     'varDecl':     reduce_closure(2, 'program'),#归约到非终状态: program?
-     'constDecl':   reduce_closure(2, 'program'),#归约到非终状态: program?
-     'statement':   reduce_closure(2, 'program') #归约到非终状态: program?
+    {'$':           reduce_builder(2, 'program'),#归约到非终状态: program? 
+     'varDecl':     reduce_builder(2, 'program'),#归约到非终状态: program?
+     'constDecl':   reduce_builder(2, 'program'),#归约到非终状态: program?
+     'statement':   reduce_builder(2, 'program') #归约到非终状态: program?
      },
 
 # ----------------------------------------------------------这下面才是终结符，可以被分析
     #3
-    {'$':           reduce_closure(1, 'declaration'), #归约到非终状态: GLOBAL_STACK[1]
-     'varDecl':     reduce_closure(1, 'declaration'), #归约到非终状态: GLOBAL_STACK[1]
-     'constDecl':   reduce_closure(1, 'declaration'), #归约到非终状态: GLOBAL_STACK[1]
-     'statement':   reduce_closure(1, 'declaration')  #归约到非终状态: GLOBAL_STACK[1]
+    {'$':           reduce_builder(1, 'declaration'), #归约到非终状态: GLOBAL_STACK[1]
+     'varDecl':     reduce_builder(1, 'declaration'), #归约到非终状态: GLOBAL_STACK[1]
+     'constDecl':   reduce_builder(1, 'declaration'), #归约到非终状态: GLOBAL_STACK[1]
+     'statement':   reduce_builder(1, 'declaration')  #归约到非终状态: GLOBAL_STACK[1]
      },
 
     #4
-    {'$':           reduce_closure(1, 'declaration'), #归约到非终状态: GLOBAL_STACK[1]
-     'varDecl':     reduce_closure(1, 'declaration'), #归约到非终状态: GLOBAL_STACK[1]
-     'constDecl':   reduce_closure(1, 'declaration'), #归约到非终状态: GLOBAL_STACK[1]
-     'statement':   reduce_closure(1, 'declaration')  #归约到非终状态: GLOBAL_STACK[1]
+    {'$':           reduce_builder(1, 'declaration'), #归约到非终状态: GLOBAL_STACK[1]
+     'varDecl':     reduce_builder(1, 'declaration'), #归约到非终状态: GLOBAL_STACK[1]
+     'constDecl':   reduce_builder(1, 'declaration'), #归约到非终状态: GLOBAL_STACK[1]
+     'statement':   reduce_builder(1, 'declaration')  #归约到非终状态: GLOBAL_STACK[1]
      },
 
     #5
-    {'$':           reduce_closure(1, 'declaration'), #归约到非终状态: GLOBAL_STACK[1]
-     'varDecl':     reduce_closure(1, 'declaration'), #归约到非终状态: GLOBAL_STACK[1]
-     'constDecl':   reduce_closure(1, 'declaration'), #归约到非终状态: GLOBAL_STACK[1]
-     'statement':   reduce_closure(1, 'declaration')  #归约到非终状态: GLOBAL_STACK[1]
+    {'$':           reduce_builder(1, 'declaration'), #归约到非终状态: GLOBAL_STACK[1]
+     'varDecl':     reduce_builder(1, 'declaration'), #归约到非终状态: GLOBAL_STACK[1]
+     'constDecl':   reduce_builder(1, 'declaration'), #归约到非终状态: GLOBAL_STACK[1]
+     'statement':   reduce_builder(1, 'declaration')  #归约到非终状态: GLOBAL_STACK[1]
      }
     ]
 
 if __name__ == "__main__":
     state = State()
-    advance(state, 'varDecl')
-    advance(state, 'varDecl')
-    # advance(state, 'constDecl')
-    # advance(state, '$')
+    parser_stmt(state, 'varDecl')
+    parser_stmt(state, '$')
     print('--------------')
     print(state.stack)
     print(state.top)
