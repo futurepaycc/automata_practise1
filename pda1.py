@@ -3,7 +3,6 @@
 视频: https://www.bilibili.com/video/BV1oE4116794?p=26
 操作: python pda1.py; input1: pda1.txt input2: aa
 """
-#!/usr/bin/python
 import os
 
 start_input = "" # input word to be found or not found
