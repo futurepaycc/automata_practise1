@@ -3,16 +3,22 @@
 来源: https://github.com/darius/sketchbook/blob/master/regex/integrated1.py 
 问题: 括号组合实现有bug{ match('(a|b)*c', 'caac') } 、代码不易读
 优点: 代码少，无依赖
-特点: 综合性，复杂性极高，用来学习参考，可暂不深咎
-参考: 
+特点: 综合性，复杂性极高，函数式编程抽象层级多，用来学习参考，可暂不深咎
+一些参考: 
     * Thompson 算法
-    * https://github.com/darius/sketchbook/blob/master/regex/nfa.py (同目录下的其它文件等)
+    * https://github.com/darius/sketchbook/blob/master/regex/ (同目录下的其它文件等)
+        * nfa.py
+        * nfa_loopsloop.py
 
 TODO:
-化简，对每个模式进行精简代码分析，如只看'ab'模式的构造
+* 先理解透彻常规NFA生成式的正则处理regexp1.py
+* 查看原仓库简化文件，分离函数式与NFA的关注点
+* 手工化简，对每个模式进行精简代码分析，如只看'ab'模式的构造
 
 理解: 
+    * 本文件是集成文件，原作者也是分步实现各种匹配方式并结合的
     * 这里的每个state_λ函数是个闭包，包装了参数为状态，lambda自身为运算，相当于一个对象实例
+    * set展开时是不是用到了函子和范畴的概念?
 """
 
 # ---------------------------------------------------------------------
@@ -29,18 +35,18 @@ def accepting_state_λ(c):
 def expecting_state(p_char,k):
     def expecting_state_λ(in_char):
         # 运行时(匹配时)代码
-        # 这里的k可以是右一个模式字串的expecting_state_λ，形成函数练链表|栈
+        # 这里的k可以是右一个模式字串的expecting_state_λ，形成函数链表|栈
         # p='ab'外部看似一个expecting_state_λ,内则是一个expecting_state_λ串
         # res = k(set()) if in_char == p_char else set()
         if in_char == p_char:
             res = k(set())
         else:
-            res = k(set())
+            res = set()
         return res
     return expecting_state_λ
 
-# 状态节点
-# def state_node(state): return lambda seen: set([state]) #返回一个lambda函数: def k(seen): return set([state]), 操，没有用到seen啊
+# 状态节点, 没有用到seen啊, 就是简单的将状态算子再包wrapp一层成通用状态算子么 => 抽像类?
+# def state_node(state): return lambda seen: set([state]) 
 def state_node_wrapper(state_λ):
     def state_node_inner(seen):
         res = set([state_λ])
@@ -75,7 +81,7 @@ def loop_node(k, make_k):
 def parse(re):
     p_char_list = list(re)
 
-    # 递归解析表达式, parse_factor <--> parse_factor 双向调用
+    # 递归解析表达式, parse_factor <--> parse_factor 会互调
     # kaleidoscope中的优先级算法，precedence初始为0, k为state_node函数返回的lamda闭包: set([state])
     # 优先级: )=>0, |=> 4, *=>6, default => 2
     def parse_expr(precedence, k):
