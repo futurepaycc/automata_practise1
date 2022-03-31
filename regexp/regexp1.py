@@ -4,6 +4,7 @@
 优点: NFA代码易读，有状态输出
 缺点: 词法、文法非典型算法，基于栈和组合虚拟机
 """
+from typing import List # for mypy return list type declare
 # ---------------------------------------------------------------------
 #  parser 
 # ---------------------------------------------------------------------
@@ -18,6 +19,7 @@ not_start_of_trunk = [")", ".", "*", "|"]
 # 1. character. ab -> a.b
 # 2. bracked expression. (!$#)a -> (!$#).a
 # 3. The unary operator * together with its operand.  a*b -> a*.b
+# 显式插入连接符号
 def insert_explicit_concate_operator(exp: str) -> str:
     output = ""
     for i, token in enumerate(exp):
@@ -43,12 +45,14 @@ operators = [".", "|", "*"]
 
 parenthesis = ["(", ")"]
 
+# '或|并' 的优先级最低
 precedence = {
     "|": 0,
     ".": 1,
     "*": 2,
 }
 
+# Postfix => 后缀表达式，逆波兰表达式
 def to_postfix(explicited_concate_exp: str) -> str:
     def stack_top_is_poppable(stack, token):
         return (len(stack) > 0) and (stack[-1] != "(") and (precedence[stack[-1]] >= precedence[token])
@@ -82,6 +86,7 @@ class State:
     global_id = 0
     def __init__(self, is_end: bool = False):
         self.is_end = is_end
+        # NOTE 普通状态转移与空状态转移分开声明
         self.transition = {}
         self.epsilon_transition = []
 
@@ -97,14 +102,15 @@ class State:
         output += str(["State {}".format(i.id) for i in self.epsilon_transition]) + "\n"
         return output
 
-
+# NFA
 class FiniteAutomata:
     def __init__(self, start: State, end: State):
         self.start = start
         self.end = end
 
     def __str__(self):
-        def all_transitions(come_from: State) -> [State]:
+        # 合并所有的状态转移
+        def all_transitions(come_from: State) -> List[State]:
             output = list(come_from.transition.values())
             output.extend(come_from.epsilon_transition)
             return output
@@ -259,7 +265,7 @@ def search(nfa: FiniteAutomata, word: str) -> bool:
 # Return the list of given state and all possible states can be reach by any
 # epsilon transition chain from given state.
 # Visited 
-def all_next_states_from(state: State) -> [State]:
+def all_next_states_from(state: State) -> List[State]:
     visited = set()
     output = []
     if len(state.epsilon_transition) > 0:
@@ -267,7 +273,7 @@ def all_next_states_from(state: State) -> [State]:
             if st not in visited:
                 visited.add(st)
                 output.extend(all_next_states_from(st))
-    else:  # DEBUG: If this `else` should be deleted?
+    else:  # DEBUG, If this `else` should be deleted?
         output.append(state)
     return output
 
