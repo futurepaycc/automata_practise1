@@ -51,19 +51,23 @@ display(HTML(df.to_html(index=False)))
 def NFA_accept(NFA_table,input):
 
     # 外层输入迭代
-    NFA_state_set = {NFA_INIT}              #对于一次匹配，状态集初始化一次
+    current_NFA_state_set = {NFA_INIT}              #对于一次匹配，状态集初始化一次
     for input_char in input:
 
         # 对于一个输入字符的内层状态迭代
+        # 将输入作用于 当前'可能状态集', 得到 下一步'可能状态集'
         next_sate_set = set()
-        for NFA_state in NFA_state_set:
+        for current_NFA_state in current_NFA_state_set:
             try:
-                #self.delta[state][a]看成两部分: self.delta[state] 当前状态， [a] 作用于a输入
-                next_sate_set = next_sate_set | NFA_table[NFA_state][input_char] 
-            except KeyError: pass
-        NFA_state_set = next_sate_set       #保存下一个输入的可选状态(这里只需保存一步，有点hmm的意思)
+                # 右侧为 求并集运算
+                # self.delta[state][a]看成两部分: self.delta[state] 当前状态， [a] 作用于a输入
+                next_sate_set = next_sate_set | NFA_table[current_NFA_state][input_char] 
+            except KeyError: 
+                pass
+        current_NFA_state_set = next_sate_set       #保存下一个输入的可选状态(这里只需保存一步，有点hmm的意思)
 
-    if NFA_FINAL in NFA_state_set: #接受判断，有路径到终态，判断为true
+    # 循环结束后的 '可能状态集' 如何含有 '终结结点' 即为匹配成功
+    if NFA_FINAL in current_NFA_state_set: #接受判断，有路径到终态，判断为true
         return True
     return False
 
@@ -71,7 +75,8 @@ def NFA_accept(NFA_table,input):
 #  测试: 以01结尾的序列合法
 # ---------------------------------------------------------------------
 if __name__ == "__main__":
-    print(  NFA_accept(NFA_table,"010")   )
-    print(  NFA_accept(NFA_table,"11")    )
-    print(  NFA_accept(NFA_table,"1101")  )
-    print(  NFA_accept(NFA_table,"1111")  )
+    print(  NFA_accept(NFA_table,"01")   )
+    # print(  NFA_accept(NFA_table,"010")   )
+    # print(  NFA_accept(NFA_table,"11")    )
+    # print(  NFA_accept(NFA_table,"1101")  )
+    # print(  NFA_accept(NFA_table,"1111")  )
