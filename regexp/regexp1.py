@@ -4,6 +4,15 @@
 优点: NFA代码易读，有状态输出
 缺点: 词法、文法非典型算法，基于栈和组合虚拟机
 """
+
+""" 
+理解:
+* ϵ equ  : 基础匹配
+* . * |  : 运算匹配
+
+参《计算的本质:ch3.3》
+"""
+
 from typing import List # for mypy return list type declare
 # ---------------------------------------------------------------------
 #  parser 
@@ -102,20 +111,20 @@ class State:
         output += str(["State {}".format(i.id) for i in self.epsilon_transition]) + "\n"
         return output
 
-# NFA
+# NFA, 类和闭包混写，代码习惯有问题吧 ???
 class FiniteAutomata:
     def __init__(self, start: State, end: State):
         self.start = start
         self.end = end
 
     def __str__(self):
-        # 合并所有的状态转移
         def all_transitions(come_from: State) -> List[State]:
             output = list(come_from.transition.values())
             output.extend(come_from.epsilon_transition)
             return output
 
         # Perform depth-first search from given state, print them.
+        # NOTE 构建状态转移表!
         def traverse_state(stand_on: State) -> str:
             output = ""
             if id(stand_on) in visited_id:
@@ -282,10 +291,11 @@ def all_next_states_from(state: State) -> List[State]:
 #  test 
 # ---------------------------------------------------------------------
 import unittest  
+# NOTE 宏观流程: 原始pattern -> 插入链接运算符 -> 构建逆波兰表达式 -> 构建NFA
 def create_matcher1(regex):
     postfix_exp = to_postfix(insert_explicit_concate_operator(regex))
     nfa = to_NFA(postfix_exp)
-    return lambda word: search(nfa, word) #NOTE: εNFA的使用
+    return lambda word: search(nfa, word) #NOTE εNFA的使用
 
 class Test_hello1(unittest.TestCase):
     def test_single(self):
