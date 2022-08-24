@@ -28,6 +28,7 @@ NFA_FINAL='q2'
 # 下面代码一句不能少
 def NFA_accept(NFA_table,input):
     NFA_state_set = {NFA_INIT} #为了下面迭代将初始状态包装成初始状态集合
+    # NOTE 本质是一颗树的分支遍历
     for input_char in input:
         next_sate_set = set()
         for NFA_state in NFA_state_set: #这个内部循环，表达每个状态路径都走一遍

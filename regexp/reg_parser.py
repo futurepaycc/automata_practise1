@@ -43,7 +43,7 @@ exp      = term [|] exp      {push '|'}
          | term
          |                   empty?
 
-term     = factor term       chain {add \x08} #NOTE: 这里的chain指的是concat的吧，\x08指结束符么?: Sending '\x04' will send EOF . Sending '\x08' is a backspace
+term     = factor term       chain {add \x08} #NOTE: 这里的chain指的是concat的吧，\x08 ascii: Sending '\x04' will send EOF . Sending '\x08' is a backspace
          | factor
 
 factor   = primary [*]       star {push '*'}
