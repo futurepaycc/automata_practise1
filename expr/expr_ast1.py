@@ -115,6 +115,6 @@ def Lex( exprssn, p ):
    return p.end()
  
  
-expr = input("Expression:")
+expr = input("Expression>")
 astTree = Lex( expr, Yaccer())
 print(expr, '=',astTree.eval())
