@@ -21,8 +21,8 @@ ops_stack   = []    # 算符栈
 token_list = list(set(list("".join( grammer.split("->")[1].split("|") ))))  # ['E', 'f', '*', '+']
 # grammer部分(含生成集)
 stmt_list = grammer.split("->")[1].split("|")                               # ['E+E', 'E*E', 'f']
-first_set = grammer.split("->")[0]                                          # 'E':  ??? 这个first集与定义不一致啊!!!
-follow_mapping = dict(zip(stmt_list,[first_set]*len(stmt_list)))            # 右部到左部的反向映射
+first_set = grammer.split("->")[0]                                          # 'E':  ??? 这个first集与定义不一致啊!!! -> 不是first集的概念
+follow_mapping = dict(zip(stmt_list,[first_set]*len(stmt_list)))            # {'E+E': 'E', 'E*E': 'E', 'f': 'E'}: 右部到左部的反向映射
 
 def reduce_stmt():
     while len(ops_stack) > 0:
