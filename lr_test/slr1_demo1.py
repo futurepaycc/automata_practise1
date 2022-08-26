@@ -428,6 +428,7 @@ def printAllGOTO(diction):
 # user defined grammar rule set
 # rules section - *START*
 
+# ----------------------------------------------- 测试部分: 很多全局变量依赖, 不易包装
 
 # example sample set 01
 rules = ["E -> E + T | T",

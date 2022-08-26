@@ -1,5 +1,25 @@
 # https://blog.reilkay.com/UsePythonTofindSelectCollection/
 
+# BUG: 自定义文法也没有解释正确!
+
+""" Follow集计算：
+A -> ...Bc...型：根据定义，c ∈ Follow(B)。
+
+A -> ...BC...型：根据定义，First(C) ⊆ Follow(B)。
+
+A -> ...C型：文法左部的Follow集包含于串尾非终结符的Follow集。本例中Follow(A) ⊆ Follow(C)。
+
+A -> ...BC这一类较为特殊，处理方法如下：
+    该类型是A->...BC...型和A->...C型的特例情况，除了要按A->...BC...型的情况处理，将First(C) ⊆ Follow(B)，还要进行以下操作：
+    第一步：看串尾C能否推导出ε。
+    若不能推导出空，则同A->...C型操作，将Follow(A)Follow(C)。
+    若能推导出空，则Follow(A)也属于Follow(B)，即Follow(A)Follow(B)，并进行下一步。
+    第二步：若串尾非终结符能推导出ε，当其推空时，符号串将变为A->...B。
+    重复第一步操作，即判断当前串尾符号B能否推导出ε，并按第一步操作。
+    若不能推出ε则结束循环。
+"""
+
+
 # 判断非终结符的函数
 def isnonterminal(symbol):
     if symbol[0] == '<' and symbol[-1] == '>':
@@ -24,6 +44,20 @@ class CalSelect(object):
 			"<F>->( <E> )",
 			"<F>->i"
         ]
+
+        # BUG: 自定义文法也没有解释正确!
+        self.grammar = [
+            "<S>-><A> <C> <B>",
+            "<S>-><C> b b",
+            "<S>-><B> a",
+            "<A>->d a",
+            "<A>-><B> <C>",
+            "<B>->g",
+            "<B>->ϵ",
+            "<C>->h",
+            "<C>->ϵ"
+        ]
+
         # 初始化终结符
         for i in range(0, len(self.grammar)):
             self.grammar[i] = self.grammar[i].replace('函数名', 'FT')
