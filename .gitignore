@@ -2,3 +2,4 @@
 *.out
 shift_reduce1
 enfa2dfa1
+**/__pycache__

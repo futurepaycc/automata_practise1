@@ -129,5 +129,41 @@ def _test_v2():
     res = first_v2('S')
     assert( res == {'h', 'ϵ', 'a', 'd', 'b', 'g'} )    
 
+
+def first_v3(key,grammer):
+    ritems:List[str] = grammer[key]
+    res = set()
+
+    # NOTE 这里嵌套循环 + 递归 如何表达啊!, 感觉不直观，不确定啊
+    for item_seq in ritems:
+        # 如果首项是小写=> 终结符或ϵ, 直接添加不再循环
+        if item_seq[0].islower():
+            res.add( item_seq[0] )
+        # 首项大写非终解符,循环
+        else:
+            # 因为第一个可能直接只是ϵ的非终接符，不排除它
+            for item in item_seq:
+                # key2: 这里不怕重复,靠set语义吧
+                if item.islower():
+                    res.add(item)
+                else:
+                    child_res = first_v3( item,grammer )
+                    res = res.union( child_res )
+                    # key1: 如果当前这个非终结符不含ϵ不进行下一个，断链
+                    if 'ϵ' not in child_res:
+                        break
+    return res
+
+def _test_v3():
+    res = first_v3('B',grammer2)
+    assert( res == {'g', 'ϵ'} )
+
+    res = first_v3('A',grammer2)
+    assert( res == {'h', 'ϵ',  'd', 'g'} )
+
+    res = first_v3('S',grammer2)
+    assert( res == {'h', 'ϵ', 'a', 'd', 'b', 'g'} )        
+
+
 if __name__ == "__main__":
-    _test_v2()
+    _test_v3()
