@@ -1,0 +1,4 @@
+S -> ACB | Cbb | Ba
+A -> da  | BC
+B -> g   | ϵ
+C -> h   | ϵ

@@ -110,7 +110,7 @@ def follow_v1(key):
 # print(res)
 
 
-""" 尝试TODO:
+""" 尝试TODO1, TODO2: ll1_demo中的算法
 Follow集的计算就相对first集稍微难一点：follow集的意义是寻找所要求字符的下一个字符可能产生的集合，所以寻找follow集应从产生式的右边进行寻找。
 1. 在产生式的右边找到相应的字符，假设紧跟其后的是一个终结符，那么该终结符就是所要求的follow集；
 2. 假设跟在其后的是一个非终结符，那么需要判断该非终结符是否可以为空：
@@ -119,6 +119,46 @@ Follow集的计算就相对first集稍微难一点：follow集的意义是寻找
     2.2 假如不为空，那么寻找该非终结符的first集，并将结果加入到搜索集合当中。
 3.直到不再有非终结符产生，找到所有的终结符，计算结束。
 """
+
+""" 
+NOTE: NOTE: NOTE:
+
+这它娘的是一个很牛逼的文法， 现在只有下面两个这个在线验证器能搞定
+"""
+
+"""  算法在线验证:  https://www.usna.edu/Users/cs/wcbrown/courses/F20SI413/firstFollowPredict/ffp.html
+S -> A C B $
+S -> C b b $
+S -> B a $
+A -> d a  
+A -> B C 
+B -> g 
+B -> epsilon
+C -> h 
+C -> epsilon
+"""
+
+
+""" 算法验证: https://github.com/MikeDevice/first-follow/blob/master/index.js (源码)
+https://mikedevice.github.io/first-follow/ (web)
+
+S⟶ A C B 
+S⟶ C b b 
+S⟶ B a 
+A⟶ d a  
+A⟶ B C 
+B⟶ g 
+B⟶
+C⟶ h 
+C⟶
+
+ """
+
+
+
+
+
+
 
 def follow_v2(key):
     if key == "S": return {"$"}
