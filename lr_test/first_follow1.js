@@ -169,3 +169,4 @@ const { firstSets, followSets, predictSets } = firstFollow(rules);
 // console.log(rules)
 // console.log(firstSets)
 // console.log(followSets)
+console.log(predictSets)

@@ -21,6 +21,8 @@ rules = [
 
 firstSets = {}
 followSets = {}
+predictSets = {}
+
 isNoTerm = lambda item:item.isupper()
 
 def getSet(dict,key)->set:
@@ -117,7 +119,52 @@ def makeFollowSets():
                     isSetChanged = True
     # return followSets                
 
+
+
+# stat_predictSet:      产生式的预测分析集
+# r_items:              右侧项集
+# additionSet:          左部follow集
+def collectPredictSet(stat_predictSet:set,r_items:List[str],left_followSet:List[str])->set:
+    # 下面的continue和break模仿的是js的every语义
+    for idx,r_item in enumerate(r_items):
+        # 如非终接符 循环处理 (这个循环有递归的感脚)
+        if isNoTerm(r_item):
+            # 先加上下一项的first集
+            item_first_set = getSet(firstSets,r_item)
+            stat_predictSet = stat_predictSet.union( [sym for sym in item_first_set if sym != 'ϵ'] ) 
+
+            # 如果上面计算的下项first集中有ϵ
+            if 'ϵ' in item_first_set:
+                # 后面还有字符继续
+                if len(r_items) > idx + 1 and r_items[idx + 1]: 
+                    continue
+                # 后面没有字符，加上左部的followset
+                stat_predictSet = stat_predictSet.union( left_followSet )
+        # 如终接符 只取一个
+        else:
+            stat_predictSet = stat_predictSet.union( [r_item] ) 
+            break
+    return stat_predictSet
+
+def makePredictSets():
+    for ruleIndex,rule in enumerate(rules):
+        left,right = rule['left'],rule['right']
+        firstItem = right[0]
+        set_ = set()
+
+        if isNoTerm(firstItem):
+            temp = collectPredictSet(set_,right,getSet(followSets,left))
+            set_ = set_.union( temp )
+        elif firstItem == 'ϵ':
+            set_ = getSet(followSets,left)
+        else:
+            set_.add(firstItem)
+        predictSets[str(ruleIndex+1)] = set_
+
+
 makeFirstSets()
 pprint(firstSets)
 makeFollowSets()
 pprint(followSets)
+makePredictSets()
+pprint(predictSets)
