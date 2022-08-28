@@ -2,7 +2,7 @@
 
 // 参考: https://bbs.pediy.com/thread-248501.htm
 
-const EMPTY_CHAIN = 'ϵ';
+const EMPTY_CHAIN = null;
 const END_MARKER = '$';
 
 function firstFollow(rules) {
@@ -125,7 +125,7 @@ function firstFollow(rules) {
 };
 
 
-const rules = [
+let rules = [
     {
         left: 'S',
         right: ['A', 'C', 'B']
@@ -152,7 +152,7 @@ const rules = [
     },
     {
         left: 'B',
-        right: ['ϵ']
+        right: [null]
     },
     {
         left: 'C',
@@ -160,13 +160,25 @@ const rules = [
     },
     {
         left: 'C',
-        right: ['ϵ']
+        right: [null]
     },
+];
+
+// 问题, 如果用字面'ϵ'而不用null, follow集计算结果不正确
+rules = [
+    {left:"E", right:["T","E'"]},
+    {left:"E'",right:["+","T","E'"]},
+    {left:"E'",right:[null]},
+    {left:"T", right:["F","T'"]},
+    {left:"T'",right:["*","F","T'"]},
+    {left:"T'",right:[null]},
+    {left:"F", right:["id"]},
+    {left:"F", right:["(","E",")"]},       
 ];
 
 const { firstSets, followSets, predictSets } = firstFollow(rules);
 
 // console.log(rules)
-// console.log(firstSets)
-// console.log(followSets)
+console.log(firstSets)
+console.log(followSets)
 console.log(predictSets)

@@ -48,6 +48,9 @@ def collectFirstSet(firset:set,items:List[str],additionSet:List[str])->set:
                     continue
                 # 后面没有字符，对first集就加上ϵ
                 firset = firset.union( additionSet )
+            # 这里不能省, 出现过bug !!!
+            else:
+                break                
         # 如终接符 只取一个
         else:
             firset = firset.union( [item] ) 
