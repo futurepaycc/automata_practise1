@@ -1,7 +1,6 @@
 # https://www.cnblogs.com/standby/p/6792837.html
 # https://www.bilibili.com/video/BV18U4y1m7Dg 
 
-
 # https://www.geeksforgeeks.org/compiler-design-slr1-parser-using-python/
 # https://www.bilibili.com/video/BV1P4411e7gm?p=18 (12:00)
 
@@ -9,7 +8,15 @@
 from pprint import pprint
 
 """ 本例目标: lr0的action_goto表构造
+参考书:
+《编译原理_蒋宗礼:p193:算法5.6》    # lr0 
+《虎: p54》                      # lr0
 
+《龙: p177: 算法4.46》            # slr -- 需要应用follow集
+《2.编译器设计_2nd：ch03.4.2》     #lr1
+
+《Algorithms, languages, automata, and compilers: ch07》
+《Parsing Techniques A Practical Guide: ch09.5》
 """
 
 
@@ -170,37 +177,45 @@ all_sts[0] = st0
 current_sts_idx = 0
 
 def move_cursor(rule_right:list):
+    rule_right = rule_right[:]   #copy
     cursor_indx = rule_right.index(CURSOR_SYM)
     del rule_right[cursor_indx]
     rule_right.insert(cursor_indx+1,CURSOR_SYM)
-    return cursor_indx + 1
+    return cursor_indx + 1,rule_right
+
+def check_add_st(res):
+    global current_sts_idx
+    if res not in all_sts.values():
+        current_sts_idx += 1
+        all_sts[current_sts_idx] = res
+
 
 # TODO 整合前面st0构建逻辑并统一
-# BUG: 1 有inplace修改，结果不正确!
-# BUG: 2 状态空间搜索不完整，应该搜到结果集不在变化为止, 也就是每个∙要挪到最后
+# ✓ 1 有inplace修改，结果不正确!
+# ✓ 2 状态空间搜索不完整，应该搜到结果集不在变化为止, 也就是每个∙要挪到最后
 def gen_all_sts(rules,st0):
-    global current_sts_idx
     for stat_rule_item in st0:
         left,right = stat_rule_item['left'],stat_rule_item['right']
 
-        current_sts_idx += 1
         if right[-1] != CURSOR_SYM:
-            new_cursor_index = move_cursor(right)
+            new_cursor_index,right = move_cursor(right)
             # 如果∙已经移到最后，这个状态完成
+            res = [ {"left":left,"right":right} ]
             if right[-1] == CURSOR_SYM:
-                all_sts[current_sts_idx] = [ {"left":left,"right":right} ]
+                # all_sts[current_sts_idx] = [ {"left":left,"right":right} ]
+                # res = [ {"left":left,"right":right} ]
+                pass
 
             # 如果没有移到最后，---采用build_st0类似逻辑---，递归构造其它closure状态
             # 加入全局状态后最否要排重???
             else:
-                res = [ {"left":left,"right":right} ]
                 next_sym = right[new_cursor_index + 1]
                 # 下一个终结符: 和上面结束一样直接添加为新状态
                 if next_sym in terms:
                     pass
                 # 下一个非终结符: 递归找左部
                 else:
-                    # 递归处理逻辑
+                    # 递归处理逻辑 NOTE 与首状态处理重复
                     def recClosure(rules,next_sym):
                         for rule in rules:
                             left,right = rule["left"],rule["right"]
@@ -211,10 +226,21 @@ def gen_all_sts(rules,st0):
                                 if right[0] in nterms:
                                     recClosure(rules,right)
                     recClosure(rules[1:],next_sym)
-                all_sts[current_sts_idx] = res
+                # all_sts[current_sts_idx] = res
+            check_add_st(res)
 
-
+# ---------------------------------------- 计算项目集规范族
 gen_all_sts(G2,st0)
+prev_lenth = 1
+changed:bool = True
+while changed:
+    new_length = len(all_sts.keys())
+    if new_length > prev_lenth:
+        for key in range(prev_lenth,new_length):
+            gen_all_sts(G2,all_sts[key])
+        prev_lenth = new_length
+    else:
+        changed = False
 
 pprint(all_sts)
 
